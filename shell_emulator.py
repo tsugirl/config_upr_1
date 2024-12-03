@@ -108,6 +108,8 @@ class ShellEmulatorApp(tk.Tk):
         command_text = self.input_field.get()
         self.input_field.delete(0, tk.END)
 
+        self.write_output(f"{command_text}")
+
         parts = command_text.split()
         cmd = parts[0] if parts else ""
         args = parts[1:] if len(parts) > 1 else []
@@ -129,6 +131,7 @@ class ShellEmulatorApp(tk.Tk):
             result = "\nUnknown command"
 
         self.write_output(f"{result}\n$ ")
+
 
     def on_close(self):
         """Закрытие окна."""
