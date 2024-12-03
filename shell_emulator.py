@@ -6,7 +6,7 @@ import configparser
 import json
 import datetime
 
-# чтение конфиг. файла
+# Чтение конфиг. файла
 def load_config(config_path):
     config = configparser.ConfigParser()
     config.read(config_path)
@@ -15,7 +15,7 @@ def load_config(config_path):
     script_path = config['paths']['start_script']
     return vfs_path, log_path, script_path
 
-# логгирование
+# Логирование
 def log_action(log_path, action):
     log_entry = {"action": action, "timestamp": str(datetime.datetime.now())}
     try:
@@ -24,12 +24,12 @@ def log_action(log_path, action):
     except Exception as e:
         print(f"Logging error: {e}")
 
-# получаю список директорий и файлов
+# Получаю список директорий и файлов
 def load_virtual_filesystem(vfs_path):
     with zipfile.ZipFile(vfs_path, 'r') as z:
         return z.namelist()
 
-# обработка команд тут
+# Обработка команд
 class ShellEmulator:
     def __init__(self, vfs):
         self.current_dir = "" 
@@ -78,29 +78,33 @@ class ShellEmulatorApp(tk.Tk):
         self.geometry("600x400")
         
         self.vfs_path, self.log_path, self.script_path = load_config(config_path)
-        
         self.virtual_filesystem = load_virtual_filesystem(self.vfs_path)
         self.shell = ShellEmulator(self.virtual_filesystem)
 
+        # Вывод команд
         self.output = tk.Text(self, bg="black", fg="white", insertbackground="white", height=20, width=80, state=tk.DISABLED)
         self.output.pack(expand=True, fill='both')
 
+        # Поле ввода
         self.input_field = tk.Entry(self, bg="white", fg="black", insertbackground="black")
         self.input_field.pack(fill='x')
         self.input_field.bind("<Return>", self.run_command)
 
+        # Приветствие
         self.write_output("Welcome to Shell Emulator\n")
         self.write_output("$ ")
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def write_output(self, text):
+        """Вывод текста в окно терминала."""
         self.output.config(state=tk.NORMAL)
         self.output.insert(tk.END, text)
         self.output.see(tk.END)
         self.output.config(state=tk.DISABLED)
 
     def run_command(self, event):
+        """Обработка команд."""
         command_text = self.input_field.get()
         self.input_field.delete(0, tk.END)
 
@@ -127,6 +131,7 @@ class ShellEmulatorApp(tk.Tk):
         self.write_output(f"{result}\n$ ")
 
     def on_close(self):
+        """Закрытие окна."""
         self.destroy()
 
 if __name__ == "__main__":
