@@ -82,20 +82,27 @@ class ShellEmulatorApp(tk.Tk):
         self.virtual_filesystem = load_virtual_filesystem(self.vfs_path)
         self.shell = ShellEmulator(self.virtual_filesystem)
 
-        self.output = tk.Text(self, bg="black", fg="white", insertbackground="white", height=20, width=80)
+        self.output = tk.Text(self, bg="black", fg="white", insertbackground="white", height=20, width=80, state=tk.DISABLED)
         self.output.pack(expand=True, fill='both')
 
-        self.output.bind("<Return>", self.run_command)
+        self.input_field = tk.Entry(self, bg="white", fg="black", insertbackground="black")
+        self.input_field.pack(fill='x')
+        self.input_field.bind("<Return>", self.run_command)
 
-        self.output.insert(tk.END, "Welcome to Shell Emulator\n")
-        self.output.insert(tk.END, "$ ")
+        self.write_output("Welcome to Shell Emulator\n")
+        self.write_output("$ ")
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
-    def run_command(self, event):
-        command_text = self.get_last_command()
+    def write_output(self, text):
+        self.output.config(state=tk.NORMAL)
+        self.output.insert(tk.END, text)
+        self.output.see(tk.END)
+        self.output.config(state=tk.DISABLED)
 
-        self.output.delete("insert-1c", tk.END)
+    def run_command(self, event):
+        command_text = self.input_field.get()
+        self.input_field.delete(0, tk.END)
 
         parts = command_text.split()
         cmd = parts[0] if parts else ""
@@ -117,16 +124,7 @@ class ShellEmulatorApp(tk.Tk):
         else:
             result = "\nUnknown command"
 
-        # вывод команд
-        self.output.insert(tk.END, f"{result}\n")
-        self.output.insert(tk.END, "$ ")  
-        self.output.see(tk.END)  # автоскролл в конец
-        return "break"
-
-    def get_last_command(self):
-        input_text = self.output.get("1.0", tk.END)
-        last_line = input_text.strip().split("\n")[-1]
-        return last_line[2:]
+        self.write_output(f"{result}\n$ ")
 
     def on_close(self):
         self.destroy()
